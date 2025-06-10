@@ -608,11 +608,14 @@ class ReActAgentWorker(BaseAgentWorker):
             )
         # TODO: see if we want to do step-based inputs
         tools = self.get_tools(task.input)
+        chat_history = (
+            await task.memory.aget(input=task.input)
+            + task.extra_state["new_memory"].get_all()
+        )
 
         input_chat = self._react_chat_formatter.format(
             tools,
-            chat_history=task.memory.get(input=task.input)
-            + task.extra_state["new_memory"].get_all(),
+            chat_history=chat_history,
             current_reasoning=task.extra_state["current_reasoning"],
         )
         # send prompt
